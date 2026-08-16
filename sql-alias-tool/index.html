@@ -11,30 +11,45 @@
   <div id="variables" style="margin-top: 20px;"></div>
   <button onclick="replaceVariables()">값 대입하기</button>
   <pre id="output"></pre>
-
   <script>
     let variables = {};
-
+  
     function convert() {
       let sql = document.getElementById("input").value;
-
+  
       // @변수 = 컬럼 → 컬럼 AS 변수
       let result = sql.replace(/@(\w+)\s*=\s*([^\s,]+)/g, "$2 AS $1");
-
-      // WHERE 절에서 @변수 추출
-      let whereMatches = sql.match(/@(\w+)/g);
-      if (whereMatches) {
-        variables = [...new Set(whereMatches)]; // 중복 제거
-        displayVariableInputs();
-      }
-
+  
+      // 다중 쿼리에서 FROM 이후의 조건절만 추출
+      const queries = sql.split(/;\s*/); // 쿼리를 세미콜론(;) 기준으로 나눔
+      variables = [];
+  
+      queries.forEach(query => {
+        const fromIndex = query.toLowerCase().indexOf("from");
+        if (fromIndex !== -1) {
+          const afterFrom = query.substring(fromIndex); // FROM 이후의 SQL만 추출
+          const conditionMatches = afterFrom.match(/(?:where|on|having)\s+[^;]*/gi); // 조건절 추출
+          if (conditionMatches) {
+            conditionMatches.forEach(condition => {
+              const matches = condition.match(/@(\w+)/g); // 조건절 내 @변수 추출
+              if (matches) {
+                variables.push(...matches);
+              }
+            });
+          }
+        }
+      });
+  
+      variables = [...new Set(variables)]; // 중복 제거
+      displayVariableInputs();
+  
       document.getElementById("output").textContent = result;
     }
-
+  
     function displayVariableInputs() {
       const container = document.getElementById("variables");
       container.innerHTML = "<h3>WHERE 절 변수 값 입력</h3>";
-
+  
       variables.forEach(variable => {
         const label = document.createElement("label");
         label.textContent = `${variable}: `;
@@ -47,10 +62,10 @@
         container.appendChild(document.createElement("br"));
       });
     }
-
+  
     function replaceVariables() {
       let sql = document.getElementById("output").textContent;
-
+  
       variables.forEach(variable => {
         const value = document.getElementById(`var-${variable}`).value;
         if (value) {
@@ -59,7 +74,7 @@
           sql = sql.replace(regex, `'${value}'`);
         }
       });
-
+  
       document.getElementById("output").textContent = sql;
     }
   </script>
