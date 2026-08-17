@@ -22,25 +22,18 @@
     main {
       padding: 4rem;
       max-width: 800px;
-      margin: 2rem auto; /* 상하 여백과 좌우 중앙 정렬 */
+      margin: 0 auto;
       background: white;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    h2 {
-      text-align: center;
-      color: #0078d7;
-      margin-bottom: 1.5rem;
-    }
-    textarea {
+    textarea, input {
       width: 100%;
-      height: 150px;
-      margin-bottom: 1rem;
-      padding: 10px;
       border: 1px solid #ddd;
       border-radius: 4px;
+      padding: 10px;
       font-size: 1rem;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
     }
     button {
       background-color: #0078d7;
@@ -56,9 +49,6 @@
     button:hover {
       background-color: #005bb5;
     }
-    #variables {
-      margin-top: 20px;
-    }
     pre {
       background: #f4f4f4;
       padding: 10px;
@@ -70,24 +60,6 @@
       line-height: 1.5;
       margin-top: 1rem;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    label {
-      font-weight: bold;
-      margin-right: 10px;
-    }
-    input[type="text"] {
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 1rem;
-      margin-bottom: 10px;
-      width: calc(100% - 20px);
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    input[type="text"]:focus {
-      border-color: #0078d7;
-      outline: none;
-      box-shadow: 0 0 5px rgba(0, 120, 215, 0.5);
     }
   </style>
 </head>
@@ -105,6 +77,54 @@
     <pre id="output"></pre>
   </main>
   <script>
+    let variables = {};
+
+    // 변환하기 함수
+    function convert() {
+      let sql = document.getElementById("input").value;
+
+      // @변수 = 컬럼 → 컬럼 AS 변수
+      let result = sql.replace(/@(\w+)\s*=\s*([^\s,]+)/g, "$2 AS $1");
+
+      // WHERE 절 변수 추출
+      const matches = sql.match(/@(\w+)/g);
+      const container = document.getElementById("variables");
+      container.innerHTML = ""; // 기존 변수 입력 필드 초기화
+
+      if (matches) {
+        variables = [...new Set(matches)]; // 중복 제거
+        variables.forEach(variable => {
+          const label = document.createElement("label");
+          label.textContent = `${variable}: `;
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = `var-${variable}`;
+          input.placeholder = `${variable} 값 입력`;
+          container.appendChild(label);
+          container.appendChild(input);
+          container.appendChild(document.createElement("br"));
+        });
+      }
+
+      document.getElementById("output").textContent = result;
+    }
+
+    // 값 대입하기 함수
+    function replaceVariables() {
+      let sql = document.getElementById("output").textContent;
+
+      variables.forEach(variable => {
+        const value = document.getElementById(`var-${variable}`).value;
+        if (value) {
+          const regex = new RegExp(variable, "g");
+          sql = sql.replace(regex, `'${value}'`);
+        }
+      });
+
+      document.getElementById("output").textContent = sql;
+    }
+
+    // 복사하기 함수
     function copyToClipboard() {
       const output = document.getElementById("output").textContent;
       if (!output) {
@@ -113,20 +133,11 @@
       }
 
       navigator.clipboard.writeText(output).then(() => {
-        alert("변환된 쿼리가 클립보드에 복사되었습니다.");
+        alert("결과가 클립보드에 복사되었습니다.");
       }).catch(err => {
         console.error("복사 실패:", err);
         alert("복사에 실패했습니다.");
       });
-    }
-
-    function convert() {
-      let sql = document.getElementById("input").value;
-    
-      // @변수 = 컬럼 → 컬럼 AS 변수
-      let result = sql.replace(/@(\w+)\s*=\s*([^\s,]+)/g, "$2 AS $1");
-    
-      document.getElementById("output").textContent = result;
     }
   </script>
 </body>
