@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MSSQL Date Format Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background-color: #0078d7;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #0078d7;
+    }
+    textarea, select, input {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #005bb5;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MSSQL Date Format Converter</h1>
+  </header>
+  <main>
+    <h2>날짜 포맷 변환 도구</h2>
+    <label for="dateInput">날짜 입력 (YYYY-MM-DD):</label>
+    <input type="date" id="dateInput" placeholder="날짜를 선택하세요">
+    
+    <label for="formatSelect">변환할 포맷 선택:</label>
+    <select id="formatSelect">
+      <option value="101">MM/DD/YYYY (USA)</option>
+      <option value="103">DD/MM/YYYY (British/French)</option>
+      <option value="104">DD.MM.YYYY (German)</option>
+      <option value="105">DD-MM-YYYY (Italian)</option>
+      <option value="110">MM-DD-YYYY (USA)</option>
+      <option value="112">YYYYMMDD (ISO)</option>
+      <option value="120">YYYY-MM-DD HH:MI:SS (ODBC Canonical)</option>
+      <option value="121">YYYY-MM-DD HH:MI:SS.FFF (ODBC Canonical with milliseconds)</option>
+    </select>
+    
+    <button onclick="convertDate()">변환하기</button>
+    <pre id="output"></pre>
+  </main>
+  <script>
+    function convertDate() {
+      const dateInput = document.getElementById("dateInput").value;
+      const format = document.getElementById("formatSelect").value;
+
+      if (!dateInput) {
+        document.getElementById("output").textContent = "날짜를 입력하세요.";
+        return;
+      }
+
+      // MSSQL 쿼리 생성
+      const query = `SELECT CONVERT(VARCHAR, '${dateInput}', ${format}) AS FormattedDate;`;
+
+      // 출력
+      document.getElementById("output").textContent = `MSSQL Query:\n${query}`;
+    }
+  </script>
+</body>
+</html>

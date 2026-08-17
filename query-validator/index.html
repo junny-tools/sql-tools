@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Query Formatter</title>
+  <title>Query Validator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -59,24 +59,26 @@
 </head>
 <body>
   <header>
-    <h1>Query Formatter</h1>
+    <h1>Query Validator</h1>
   </header>
   <main>
-    <h2>Format Your MSSQL Queries</h2>
+    <h2>Validate Your MSSQL Queries</h2>
     <textarea id="queryInput" placeholder="Paste your SQL query here..."></textarea>
-    <button onclick="formatQuery()">Format Query</button>
-    <pre id="formattedQuery"></pre>
+    <button onclick="validateQuery()">Validate Query</button>
+    <pre id="validationResult"></pre>
   </main>
   <script>
-    function formatQuery() {
+    function validateQuery() {
       const query = document.getElementById("queryInput").value;
       if (!query) {
-        document.getElementById("formattedQuery").textContent = "Please enter a query.";
+        document.getElementById("validationResult").textContent = "Please enter a query.";
         return;
       }
-      // Placeholder for actual formatting logic
-      const formatted = query.replace(/\s+/g, " ").trim(); // Simple formatting example
-      document.getElementById("formattedQuery").textContent = formatted;
+      // Placeholder for actual validation logic
+      const isValid = query.toLowerCase().includes("select"); // Simple validation example
+      document.getElementById("validationResult").textContent = isValid
+        ? "Query is valid."
+        : "Query is invalid.";
     }
   </script>
 </body>
