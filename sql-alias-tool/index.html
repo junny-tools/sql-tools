@@ -77,7 +77,7 @@
     <pre id="output"></pre>
   </main>
   <script>
-    let variables = {};
+    let variables = [];
 
     // 변환하기 함수
     function convert() {
@@ -86,25 +86,37 @@
       // @변수 = 컬럼 → 컬럼 AS 변수
       let result = sql.replace(/@(\w+)\s*=\s*([^\s,]+)/g, "$2 AS $1");
 
-      // WHERE 절 변수 추출
-      const matches = sql.match(/@(\w+)/g);
+      // WHERE, ON, HAVING 절 이후의 변수 추출
+      const fromIndex = sql.toLowerCase().indexOf("from");
+      if (fromIndex !== -1) {
+        const afterFrom = sql.substring(fromIndex); // FROM 이후의 SQL만 추출
+        const conditionMatches = afterFrom.match(/(?:where|on|having)\s+[^;]*/gi); // 조건절 추출
+        if (conditionMatches) {
+          variables = [];
+          conditionMatches.forEach(condition => {
+            const matches = condition.match(/@(\w+)/g); // 조건절 내 @변수 추출
+            if (matches) {
+              variables.push(...matches);
+            }
+          });
+          variables = [...new Set(variables)]; // 중복 제거
+        }
+      }
+
+      // 변수 입력 필드 생성
       const container = document.getElementById("variables");
       container.innerHTML = ""; // 기존 변수 입력 필드 초기화
-
-      if (matches) {
-        variables = [...new Set(matches)]; // 중복 제거
-        variables.forEach(variable => {
-          const label = document.createElement("label");
-          label.textContent = `${variable}: `;
-          const input = document.createElement("input");
-          input.type = "text";
-          input.id = `var-${variable}`;
-          input.placeholder = `${variable} 값 입력`;
-          container.appendChild(label);
-          container.appendChild(input);
-          container.appendChild(document.createElement("br"));
-        });
-      }
+      variables.forEach(variable => {
+        const label = document.createElement("label");
+        label.textContent = `${variable}: `;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = `var-${variable}`;
+        input.placeholder = `${variable} 값 입력`;
+        container.appendChild(label);
+        container.appendChild(input);
+        container.appendChild(document.createElement("br"));
+      });
 
       document.getElementById("output").textContent = result;
     }
