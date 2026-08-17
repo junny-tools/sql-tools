@@ -119,6 +119,15 @@
         alert("복사에 실패했습니다.");
       });
     }
+
+    function convert() {
+      let sql = document.getElementById("input").value;
+    
+      // @변수 = 컬럼 → 컬럼 AS 변수
+      let result = sql.replace(/@(\w+)\s*=\s*([^\s,]+)/g, "$2 AS $1");
+    
+      document.getElementById("output").textContent = result;
+    }
   </script>
 </body>
 </html>
